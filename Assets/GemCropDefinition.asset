@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d3c5b70339ad3c04b960ff8f95d11fea, type: 3}
+  m_Name: GemCropDefinition
+  m_EditorClassIdentifier: Assembly-CSharp::CropDefinition
+  cropName: Gems
+  isRare: 0
+  requiresRarePlot: 0
+  initialGrowth: 0
+  growthDuration: 20
+  stage1Threshold: 0.5
+  stage2Threshold: 0.75
+  seedPrefab: {fileID: 5354052399596671930, guid: 4695b2c6a1cd12f4c9697c3fe995ad7e, type: 3}
+  growthStagePrefabs:
+  - {fileID: 5151449366356375068, guid: 9c59a2ddd015b7349a9ad7d51474cebc, type: 3}
+  - {fileID: 3122193282882317320, guid: 5d3317f0d8f9b05429bb111f3e530771, type: 3}
+  - {fileID: 7668621586622265231, guid: ca47eda38dc315f4bac367153be8f162, type: 3}
+  initialHealth: 1
+  initialPollination: 0
+  minGrowthMoisture: 0
+  minGrowthFertility: 0
+  requiredPollination: 0
+  moistureConsumptionRate: 0
+  fertilityConsumptionRate: 0
+  harvestResource: {fileID: 0}
+  harvestYield: 0
+  requiresMana: 0
+  requiresPollination: 0
+  requiresAstralEnhancement: 0

@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d3c5b70339ad3c04b960ff8f95d11fea, type: 3}
+  m_Name: CrystalBallCropDefinition
+  m_EditorClassIdentifier: Assembly-CSharp::CropDefinition
+  cropName: CrystalBalls
+  isRare: 0
+  requiresRarePlot: 0
+  initialGrowth: 0
+  growthDuration: 20
+  stage1Threshold: 0.5
+  stage2Threshold: 0.75
+  seedPrefab: {fileID: 5354052399596671930, guid: 4695b2c6a1cd12f4c9697c3fe995ad7e, type: 3}
+  growthStagePrefabs:
+  - {fileID: 4854316278043131800, guid: 5f725f101b79936448483a1260aebdce, type: 3}
+  - {fileID: 116629425773875440, guid: 415fcd31e1a77d44bad6077c346e18e4, type: 3}
+  - {fileID: 13098677309366378, guid: e83f53ecc05c3844c9553e46cec50150, type: 3}
+  initialHealth: 1
+  initialPollination: 0
+  minGrowthMoisture: 0
+  minGrowthFertility: 0
+  requiredPollination: 0
+  moistureConsumptionRate: 0
+  fertilityConsumptionRate: 0
+  harvestResource: {fileID: 0}
+  harvestYield: 0
+  requiresMana: 0
+  requiresPollination: 0
+  requiresAstralEnhancement: 0
