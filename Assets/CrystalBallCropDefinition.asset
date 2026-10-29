@@ -27,7 +27,7 @@ MonoBehaviour:
   initialHealth: 1
   initialPollination: 0
   minGrowthMoisture: 0
-  minGrowthFertility: 0
+  minFertilityMoisture: 0
   requiredPollination: 0
   moistureConsumptionRate: 0
   fertilityConsumptionRate: 0

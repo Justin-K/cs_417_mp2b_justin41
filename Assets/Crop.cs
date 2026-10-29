@@ -3,7 +3,7 @@ using UnityEngine;
 public class Crop : MonoBehaviour {
     public CropDefinition definition;
 
-    public const float OrganicWastePerHarvest = 0.25f;
+
 
     // Stats
     private float currentHealth; // [0.0, 1.0], current health of crop => 0.0 represents death
@@ -30,6 +30,14 @@ public class Crop : MonoBehaviour {
 
     public float CurrentGrowth => currentGrowth;
     public float CurrentGrowthTime => currentGrowthTime;
+    public float CurrentPollination => currentPollination;
+    public SoilPlot Plot => currentPlot;
+    public bool IsPlanted => isPlanted;
+    public event System.Action<Crop> Harvested;
+
+    public void Pollinate(float amount) {
+        if (isPlanted && amount > 0f) currentPollination = Mathf.Clamp01(currentPollination + amount);
+    }
 
     public CropDefinition.GrowthStage GetCurrentStage() {
         if (currentGrowth >= 0f && currentGrowth < definition.stage1Threshold) { return CropDefinition.GrowthStage.Seed; }
@@ -44,13 +52,13 @@ public class Crop : MonoBehaviour {
         // Mana and other requirements can be added later.
         return currentPlot != null && currentPlot.currentMoisture > 0f
             && currentPlot.currentMoisture >= definition.minGrowthMoisture && currentPlot.currentFertility > 0f
-            && currentPlot.currentFertility >= definition.minGrowthFertility;
+            && currentPlot.currentFertility >= definition.minGrowthFertility
+            && (!definition.requiresPollination || currentPollination >= definition.requiredPollination);
     }
 
     public bool CanHarvest() {
         if (currentHealth > 0f && isPlanted) {
-            // TODO: Re-enable this check when pollination is implemented:
-            // if (definition.requiresPollination && currentPollination < definition.requiredPollination) { return false; }
+            if (definition.requiresPollination && currentPollination < definition.requiredPollination) { return false; }
             if (GetCurrentStage() != CropDefinition.GrowthStage.Mature) { return false; }
             // Other requirements (Mana / astral enhancement) can be added here later.
             return true;
@@ -80,6 +88,7 @@ public class Crop : MonoBehaviour {
         }
 
         GameObject nextVisual = Instantiate(prefab, transform.position, transform.rotation, transform);
+        ConservatoryVisuals.Fit(nextVisual, stage == CropDefinition.GrowthStage.Mature ? .55f : .3f, transform.position, true);
         if (currentPlantPrefab != null) {
             currentPlantPrefab.SetActive(false);
             Destroy(currentPlantPrefab);
@@ -120,14 +129,21 @@ public class Crop : MonoBehaviour {
     }
 
     public void OnHarvest() {
-        // Check if harvest is possible
-        if (!CanHarvest()) { return; }
+        TryHarvest();
+    }
 
-        // TODO: Award definition.harvestYield of definition.harvestResource
-        // when the shared resource/inventory system is available.
-        // ConservatoryController credits carried OrganicWaste on a successful harvest.
+    public bool TryHarvest() {
+        // Check if harvest is possible
+        if (!CanHarvest()) { return false; }
+
+        // Claim before notifying observers so repeated/reentrant input cannot reward twice.
+        isPlanted = false;
+        Harvested?.Invoke(this);
+
+        // The owning session receives Harvested and awards local yield using bed provenance.
         currentHealth = 0f;
         OnDeath();
+        return true;
     }
 
     public void OnDeath() {
@@ -149,15 +165,27 @@ public class Crop : MonoBehaviour {
     }
 
     public void OnGrow() {
+        TickGrowth(Time.deltaTime);
+    }
+
+    public void TickGrowth(float seconds) {
         // Check if growing is possible
-        if (!CanGrow()) { return; }
+        if (seconds <= 0f || !CanGrow()) { return; }
+
+        // Bound progress to available care even on long frames; never grow through a deficit.
+        seconds = Mathf.Min(seconds, (1f - currentGrowth) * Mathf.Max(1, definition.growthDuration));
+        if (definition.moistureConsumptionRate > 0f)
+            seconds = Mathf.Min(seconds, Mathf.Max(0f, currentPlot.currentMoisture - definition.minGrowthMoisture) / definition.moistureConsumptionRate);
+        if (definition.fertilityConsumptionRate > 0f)
+            seconds = Mathf.Min(seconds, Mathf.Max(0f, currentPlot.currentFertility - definition.minGrowthFertility) / definition.fertilityConsumptionRate);
 
         // growthDuration is the time for growth to advance from 0 to 1.
         // initialGrowth, if nonzero, provides a head start.
-        currentGrowthTime += Time.deltaTime;
-        currentGrowth = Mathf.Clamp01(currentGrowth + Time.deltaTime / Mathf.Max(1, definition.growthDuration));
-        currentPlot.currentMoisture = Mathf.Max(0f, currentPlot.currentMoisture - definition.moistureConsumptionRate * Time.deltaTime);
-        currentPlot.currentFertility = Mathf.Max(0f, currentPlot.currentFertility - definition.fertilityConsumptionRate * Time.deltaTime);
+        currentGrowthTime += seconds;
+        currentGrowth = Mathf.Clamp01(currentGrowth + seconds / Mathf.Max(1, definition.growthDuration));
+        if (currentGrowth > 0.99999f) currentGrowth = 1f;
+        currentPlot.currentMoisture = Mathf.Max(0f, currentPlot.currentMoisture - definition.moistureConsumptionRate * seconds);
+        currentPlot.currentFertility = Mathf.Max(0f, currentPlot.currentFertility - definition.fertilityConsumptionRate * seconds);
         OnStageTransistion();
     }
 
@@ -185,3 +213,6 @@ public class Crop : MonoBehaviour {
         OnGrow();
     }
 }
+
+
+

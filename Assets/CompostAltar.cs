@@ -4,6 +4,7 @@ using System.Collections.Generic;
 // Converts OrganicWaste from harvested crops into fertility for nearby SoilBeds.
 // Uses the same basic reservoir / pulse API as Sprinkler.
 public class CompostAltar : MonoBehaviour {
+    public bool practice;
     [SerializeField] private bool shouldRun;
     public bool active => shouldRun && currentResource > 0f;
 
@@ -39,7 +40,7 @@ public class CompostAltar : MonoBehaviour {
 
     // Optional desktop test: clicking the prefab toggles it when it has a Collider.
     private void OnMouseDown() {
-        ToggleActive();
+        if (GetComponent<ConservatoryTarget>() == null) ToggleActive();
     }
 
     // Add OrganicWaste, up to maxResource. Returns the amount that did not fit.
@@ -58,7 +59,7 @@ public class CompostAltar : MonoBehaviour {
         CompostAltar nearest = null;
         float nearestDistanceSquared = float.PositiveInfinity;
         foreach (CompostAltar altar in FindObjectsOfType<CompostAltar>()) {
-            if (!altar.isActiveAndEnabled || altar.currentResource >= altar.maxResource) { continue; }
+            if (!altar.isActiveAndEnabled || altar.practice || altar.currentResource >= altar.maxResource) { continue; }
             float distanceSquared = (altar.transform.position - harvestPosition).sqrMagnitude;
             if (distanceSquared <= altar.effectRadius * altar.effectRadius && distanceSquared < nearestDistanceSquared) {
                 nearest = altar;
@@ -75,7 +76,7 @@ public class CompostAltar : MonoBehaviour {
         List<SoilBed> beds = new List<SoilBed>();
         foreach (Collider collider in colliders) {
             SoilBed bed = collider.GetComponentInParent<SoilBed>();
-            if (bed != null && !beds.Contains(bed)) { beds.Add(bed); }
+            if (bed != null && bed.practice == practice && !beds.Contains(bed)) { beds.Add(bed); }
         }
         return beds.Count == 0 ? null : beds.ToArray();
     }
@@ -116,3 +117,5 @@ public class CompostAltar : MonoBehaviour {
         }
     }
 }
+
+
